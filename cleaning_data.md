@@ -5,7 +5,8 @@ What issues will you address by cleaning the data?
 - Dealing with NULL/missing data
 - Drop unwanted columns and focus on relative data only
 - TRIM space on string values
-
+- Assign Primary and forigen keys
+- Make sure the data make sense (ex quantity can't be negative)
 
 
 
@@ -425,3 +426,93 @@ WHERE revenue <> 0
 SELECT DISTINCT channelgrouping from analytics -- 8 groups
 
 
+
+-- ##### Products Table ##### --
+
+
+SELECT * FROM products limit 10 -- Overview of the data
+SELECT COUNT(*) FROM products -- 1,092 products
+
+
+
+UPDATE products  -- make sure no space at the beginning or end
+SET name = TRIM(name),
+	sku = TRIM(sku)
+
+
+
+SELECT * FROM products -- Make sure no NULL values in SKU (Primary Key) column
+WHERE sku IS NULL
+
+SELECT sku, count(*) from products
+GROUP BY sku
+HAVING COUNT(*) > 1 -- Make sure no duplication in sku (Primary Key) column
+
+
+
+SELECT COUNT(*) FROM products -- Make sure no NULL values in name column
+WHERE name IS NULL
+
+SELECT name, count(*) from products
+GROUP BY name
+HAVING COUNT(*) > 1 -- We have products with the same name, that's OKay.
+
+
+
+ALTER TABLE products ADD PRIMARY KEY(sku) -- SET sku column as PRIMARY KEY
+
+
+
+SELECT COUNT(*) FROM products -- No NULL values in orderedquantity column
+WHERE orderedquantity IS NULL
+
+SELECT * FROM products 
+WHERE orderedquantity = 0 -- 190 products that have no order placed
+
+
+
+SELECT COUNT(*) FROM products -- No NULL values in stocklevel column
+WHERE stocklevel IS NULL
+
+
+
+SELECT COUNT(*) FROM products -- No NULL values in restockingleadtime column
+WHERE restockingleadtime IS NULL
+
+
+
+SELECT COUNT(*) FROM products -- No NULL values in restockingleadtime column
+WHERE restockingleadtime IS NULL
+
+
+	
+SELECT COUNT(*) FROM products 
+WHERE sentimentscore IS NULL -- check NULL values in sentimentscore column, 1 row
+
+
+SELECT COUNT(*) FROM products 
+WHERE sentimentmagnitude IS NULL -- check NULL values in sentimentmagnitude column, 1 row
+
+
+SELECT * FROM products
+WHERE sentimentscore IS NULL 
+	  OR sentimentmagnitude IS NULL -- Show the records that contain NULL value, make sense becuase no order made.
+
+
+UPDATE products
+SET sentimentscore = 0, sentimentmagnitude = 0
+WHERE sentimentscore IS NULL OR sentimentmagnitude IS NULL -- Replace NULL values with 0
+
+
+
+SELECT MIN(orderedquantity) AS minOrderedquantity, 
+	   MIN(stocklevel) AS minStocklevel,
+	   MIN(restockingleadtime) AS minRestockingleadtime
+FROM products  -- make sure no negative values in orderedquantity, stocklevel, restockingleadtime columns
+
+
+
+SELECT MIN(sentimentscore) AS minsentimentscore, MAX(sentimentscore) AS maxsentimentscore,
+	   MIN(sentimentmagnitude) AS minsentimentmagnitude, MAX(sentimentmagnitude) AS maxsentimentmagnitude
+FROM products -- understand the range for sentimentscore and sentimentmagnitude   
+ 
