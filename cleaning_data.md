@@ -515,4 +515,62 @@ FROM products  -- make sure no negative values in orderedquantity, stocklevel, r
 SELECT MIN(sentimentscore) AS minsentimentscore, MAX(sentimentscore) AS maxsentimentscore,
 	   MIN(sentimentmagnitude) AS minsentimentmagnitude, MAX(sentimentmagnitude) AS maxsentimentmagnitude
 FROM products -- understand the range for sentimentscore and sentimentmagnitude   
- 
+
+
+
+-- ##### Sales_by_sku Table ##### --
+
+SELECT * FROM sales_by_sku limit 10 -- Overview of the data
+SELECT COUNT(*) FROM sales_by_sku -- Number of rows 462
+
+
+
+UPDATE sales_by_sku  -- make sure no space at the beginning or end
+SET productsku = TRIM(productsku)
+	
+
+
+SELECT COUNT(*) FROM sales_by_sku -- 156 product have 0 sales
+WHERE total_ordered = 0
+
+
+
+SELECT productsku, COUNT(*) FROM sales_by_sku
+GROUP BY productsku
+HAVING COUNT(*) > 1 -- no duplicated sku
+
+
+
+-- ##### Sales_report Table ##### --
+
+
+SELECT * FROM sales_report limit 10 -- Overview of the data
+SELECT COUNT(*) FROM sales_report -- Number of rows 454
+
+
+UPDATE sales_report  -- make sure no space at the beginning or end
+SET productsku = TRIM(productsku)
+
+
+
+SELECT productsku, COUNT(*) FROM sales_report
+GROUP BY productsku
+HAVING COUNT(*) > 1 -- No duplications
+
+
+
+SELECT * FROM sales_report
+WHERE productsku IS NULL -- No Null values
+
+
+
+SELECT COUNT(*) FROM sales_report 
+WHERE total_ordered IS NULL -- No Null values
+
+
+SELECT COUNT(*) FROM sales_report 
+WHERE total_ordered = 0 -- 150 products with no sales
+
+
+
+
