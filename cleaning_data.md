@@ -246,7 +246,40 @@ WHERE transactionrevenue <> 0
 
 
 
------- Dropped Columns ----------
+SELECT DISTINCT country FROM all_sessions
+ORDER BY country -- make sure country names are consistence
+
+SELECT COUNT(*) FROM all_sessions 
+WHERE country IS NULL OR country like '%not%' -- check NULL values in country column, 24 rows
+
+SELECT * FROM all_sessions
+WHERE country like '%not%' -- 24 rows, when country is not set, city is not set as well, and no all revenu data is 0, will delete those rows
+
+DELETE FROM all_sessions
+WHERE country IS NULL OR country like '%not%'
+
+
+
+
+SELECT DISTINCT city FROM all_sessions
+ORDER BY city -- make sure city names are consistence
+
+SELECT COUNT(*) FROM all_sessions 
+WHERE city IS NULL OR city like '%not%' -- check NULL or invlaid values in city column, 8,656 rows
+
+	
+SELECT country, city, count(*) FROM all_sessions
+group by country, city
+order by country -- Missing cities per country
+
+UPDATE all_sessions  
+SET city = 'NA'
+WHERE city IS NULL OR city like '%not%' -- unified the value
+
+SELECT COUNT(*) FROM all_sessions 
+WHERE city = 'NA' -- 8,632 rows
+
+
 
 SELECT COUNT(*) FROM all_sessions 
 WHERE productrefundamt IS NULL -- check NULL values in productrefundamt column, 15,134 rows (all rows), will drop the column
@@ -258,7 +291,7 @@ SELECT COUNT(*) FROM all_sessions
 WHERE sessionqualitydim IS NULL -- check NULL values in sessionqualitydim column, 13,906 rows
 
 SELECT * FROM all_sessions 
-WHERE sessionqualitydim IS NOT NULL -- 1,228 rows, I think this column has no benefit, we can drop it
+WHERE sessionqualitydim IS NOT NULL -- 1228 rows, I think this column has no benefit, we can drop it
 
 ALTER TABLE all_sessions DROP sessionqualitydim -- Drop sessionqualitydim column
 
@@ -300,3 +333,95 @@ SELECT pagepathlevel1, COUNT(*) FROM all_sessions
 GROUP BY pagepathlevel1 -- This column has no beneift, will drop it
 
 ALTER TABLE all_sessions DROP pagepathlevel1 -- Drop pagepathlevel1 column
+
+
+
+
+-- ##### Analytics Table ##### --
+
+SELECT * FROM analytics limit 10 -- Overview of the data
+SELECT COUNT(*) FROM analytics -- Number of rows 4,301,122
+
+
+
+UPDATE analytics  
+SET fullvisitorid = TRIM(fullvisitorid),
+	channelgrouping = TRIM(channelgrouping),
+	socialengagementtype = TRIM(socialengagementtype),
+	timeonsite = TRIM(timeonsite) -- make sure no space at the beginning or end
+
+
+
+ALTER TABLE analytics  
+ALTER visitstarttime TYPE TIMESTAMPTZ
+USING timezone('UTC', TO_TIMESTAMP(visitstarttime)) -- Change visitstarttime column data type to timestamp
+	
+
+
+SELECT COUNT(*) FROM analytics
+WHERE userid is NULL -- No data in userid column, better to drop it
+
+ALTER TABLE analytics DROP userid -- Drop userid column
+
+
+
+ALTER TABLE analytics
+ALTER unitprice TYPE float -- Change data type to float
+
+SELECT * from analytics
+where unitprice = 0 -- 188,314
+
+UPDATE analytics
+SET unitprice = unitprice / 1000000
+WHERE unitprice <>0 
+
+
+
+SELECT COUNT(*) FROM analytics
+WHERE units_sold is NULL -- Number of rows 4,205,975
+
+SELECT * FROM analytics
+WHERE units_sold is NOT NULL -- 95,147 rows
+
+UPDATE analytics
+SET units_sold = 0
+WHERE units_sold IS NULL
+
+
+
+SELECT COUNT(*) FROM analytics
+WHERE bounces is NULL -- Number of rows 3,826,283
+
+SELECT bounces, count(*) FROM analytics
+GROUP BY bounces -- This column seems not important we can drop it
+
+ALTER TABLE analytics DROP bounces -- Drop bounces column
+
+
+
+SELECT socialengagementtype, count(*) FROM analytics
+GROUP BY socialengagementtype -- Contains only one type, not important we can drop it
+
+ALTER TABLE analytics DROP socialengagementtype -- Drop bounces column
+
+
+
+SELECT COUNT(*) FROM analytics
+WHERE revenue is NULL -- Number of rows 4,285,767
+
+ALTER TABLE analytics
+ALTER revenue TYPE float
+
+UPDATE analytics
+SET revenue = 0
+WHERE revenue IS NULL
+
+UPDATE analytics
+SET revenue = revenue / 1000000
+WHERE revenue <> 0 
+
+
+
+SELECT DISTINCT channelgrouping from analytics -- 8 groups
+
+
