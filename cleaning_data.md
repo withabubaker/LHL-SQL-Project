@@ -1,8 +1,302 @@
 What issues will you address by cleaning the data?
 
+- Make sure all data have been imported
+- Data type format
+- Dealing with NULL/missing data
+- Drop unwanted columns and focus on relative data only
+- TRIM space on string values
+
 
 
 
 
 Queries:
 Below, provide the SQL queries you used to clean your data.
+
+-- ##### Import the data from CSV file ##### --
+
+DROP TABLE IF EXISTS analytics; 
+CREATE TABLE analytics (
+            visitnumber int,
+            visitid int,
+            visitstarttime int,
+            date date,
+            fullvisitorid Varchar,
+            userid int,
+            channelgrouping varchar,
+            socialengagementtype Varchar,
+            units_sold int,
+            pageviews int,
+            timeonsite Varchar,
+            bounces int,
+            revenue bigint,
+            unitprice int
+);
+DROP TABLE IF EXISTS all_sessions;
+CREATE TABLE all_sessions( 
+            fullVisitorId Varchar,
+             channelgrouping Varchar,
+              time Varchar,
+             country Varchar,
+             city Varchar,
+             totaltransactionrevenue Varchar,
+             transactions int,
+             timeonsite int,
+             pageviews int,
+             sessionqualitydim int,
+             date date,
+             visitid int,
+             type Varchar,
+             productrefundamt Varchar,
+             productquantity Varchar,
+             productprice int,
+             productrevenue Varchar,
+             productSKU Varchar,
+             v2productname Varchar,
+             v2productcategory Varchar,
+             productvariant Varchar,
+             currencycode Varchar,
+             itemquantity int,
+             itemrevenue int,
+             transactionrevenue int,
+             transactionid Varchar,
+             pagetitle Varchar,
+             searchkeyword varchar,
+             pagepathlevel1 Varchar,
+            ecommerceaction_type int,
+             ecommerceaction_step int,
+             ecommerceaction_option Varchar
+);
+
+DROP TABLE IF EXISTS products;
+CREATE TABLE products(
+            SKU Varchar,
+            name Varchar,
+            orderedQuantity int,
+            stockLevel int,
+            restockingLeadTime int,
+            sentimentScore float,
+            sentimentMagnitude float
+);
+
+DROP TABLE IF EXISTS sales_by_sku;
+CREATE TABLE sales_by_sku(
+            productSKU Varchar,
+            total_ordered int
+);
+
+
+DROP TABLE IF EXISTS sales_report;
+CREATE TABLE sales_report(
+            productSKU Varchar,
+            total_ordered int,
+            name Varchar,
+            stockLevel int,
+            restockingLeadTime int,
+            sentimentScore float,
+            sentimentMagnitude float,
+            ratio float
+);
+
+
+-- ##### All_sessions Table ##### --
+
+SELECT * FROM all_sessions limit 10 -- Overview of the data
+SELECT COUNT(*) FROM all_sessions -- Number of rows 15,134
+
+
+UPDATE all_sessions  -- make sure no space at the beginning or end
+SET fullvisitorid = TRIM(fullvisitorid),
+	channelgrouping = TRIM(channelgrouping), 
+	time = TRIM(time),
+	country = TRIM(country),
+	city = TRIM(city),
+	totaltransactionrevenue = TRIM(totaltransactionrevenue),
+	type = TRIM(type),
+	productquantity = TRIM(productquantity),
+	productrevenue = TRIM(productrevenue),
+	productsku = TRIM(productsku),
+	v2productname = TRIM(v2productname),
+	v2productcategory = TRIM(v2productcategory),
+	productvariant = TRIM(productvariant),
+	currencycode = TRIM(currencycode),
+	transactionid = TRIM(transactionid),
+	pagetitle = TRIM(pagetitle),
+	pagepathlevel1 = TRIM(pagepathlevel1),
+	ecommerceaction_option = TRIM(ecommerceaction_option) 
+	
+ 
+
+
+ALTER TABLE all_sessions  
+ALTER time TYPE float
+USING "time"::double precision -- Change time column data type to float
+
+SELECT COUNT(*) FROM all_sessions 
+WHERE productsku IS NULL -- make sure no NULL value in productsku column
+
+SELECT COUNT(*) FROM all_sessions 
+WHERE v2productname IS NULL -- make sure no NULL value in v2productname column
+
+
+
+SELECT COUNT(*) FROM all_sessions 
+WHERE totaltransactionrevenue IS NULL -- check NULL values in totaltransactionrevenue column, 15,053 rows
+
+UPDATE all_sessions  
+SET totaltransactionrevenue = 0
+WHERE totaltransactionrevenue IS NULL -- Set NULL value to 0
+
+ALTER TABLE all_sessions  
+ALTER totaltransactionrevenue TYPE float
+USING totaltransactionrevenue::double precision -- change column type to float
+
+UPDATE all_sessions  
+SET totaltransactionrevenue = totaltransactionrevenue / 1000000 
+WHERE totaltransactionrevenue <> 0 -- divid totaltransactionrevenue by 1,000,000
+
+SELECT * FROM all_sessions
+WHERE totaltransactionrevenue <> 0 -- 81 rows
+
+
+SELECT COUNT(*) FROM all_sessions 
+WHERE transactions IS NULL -- check NULL values in transactions column, 15,053 rows
+
+SELECT * FROM all_sessions 
+WHERE transactions IS NOT NULL -- number of row with transcation made 81
+
+UPDATE all_sessions  
+SET transactions = 0
+WHERE transactions IS NULL -- Set NULL value to 0
+
+
+
+SELECT COUNT(*) FROM all_sessions 
+WHERE productquantity IS NULL -- check NULL values in productquantity column, 15,081 rows
+
+UPDATE all_sessions  
+SET productquantity = 0
+WHERE productquantity IS NULL -- Set NULL value to 0
+
+ALTER TABLE all_sessions  
+ALTER productquantity TYPE int
+USING productquantity::integer -- change column type to integer
+
+
+
+SELECT COUNT(*) FROM all_sessions 
+WHERE productrevenue IS NULL -- check NULL values in orderedquantity column, 15,130 rows
+
+UPDATE all_sessions  
+SET productrevenue = 0
+WHERE productrevenue IS NULL -- Set NULL value to 0
+
+ALTER TABLE all_sessions  
+ALTER productrevenue TYPE float
+USING productrevenue::double precision -- change column type to float
+
+UPDATE all_sessions  
+SET productrevenue = productrevenue / 1000000 
+WHERE productrevenue <> 0 -- divid productrevenue by 1,000,000
+
+
+
+SELECT COUNT(*) FROM all_sessions 
+WHERE ecommerceaction_option IS NULL -- check NULL values in ecommerceaction_option column, 15,103 rows
+
+SELECT * FROM all_sessions 
+WHERE ecommerceaction_option IS NOT NULL -- 1 for Billing and Shipping, 2 for Payment, 3 for Review
+
+SELECT DISTINCT ecommerceaction_step FROM all_sessions -- We have only 3 step (1,2,3)
+
+-- Fill out ecommerceaction_option column based on the data in ecommerceaction_step column
+update all_sessions
+	SET ecommerceaction_option = 
+		CASE
+			WHEN ecommerceaction_option IS NOT NULL THEN ecommerceaction_option
+			WHEN ecommerceaction_step = 1 THEN 'Billing and Shipping'
+			WHEN ecommerceaction_step = 2 THEN 'Payment'
+			WHEN ecommerceaction_step = 3 THEN 'Review'
+			END 
+			
+
+
+
+ALTER TABLE all_sessions  
+ALTER productprice TYPE float -- Change column type to float
+
+UPDATE all_sessions  
+SET productprice = (productprice / 1000000) -- divide productprice by 1,000,000
+
+
+
+SELECT COUNT(*) FROM all_sessions 
+WHERE transactionrevenue IS NOT NULL -- Only 4 rows contain data
+
+ALTER TABLE all_sessions  
+ALTER transactionrevenue TYPE float -- Change column type to float
+
+UPDATE all_sessions  
+SET transactionrevenue = 0
+WHERE transactionrevenue IS NULL
+
+UPDATE all_sessions  
+SET transactionrevenue = transactionrevenue / 1000000
+WHERE transactionrevenue <> 0
+
+
+
+------ Dropped Columns ----------
+
+SELECT COUNT(*) FROM all_sessions 
+WHERE productrefundamt IS NULL -- check NULL values in productrefundamt column, 15,134 rows (all rows), will drop the column
+
+ALTER TABLE all_sessions DROP productrefundamt -- Drop productrefundamt column
+
+
+SELECT COUNT(*) FROM all_sessions 
+WHERE sessionqualitydim IS NULL -- check NULL values in sessionqualitydim column, 13,906 rows
+
+SELECT * FROM all_sessions 
+WHERE sessionqualitydim IS NOT NULL -- 1,228 rows, I think this column has no benefit, we can drop it
+
+ALTER TABLE all_sessions DROP sessionqualitydim -- Drop sessionqualitydim column
+
+
+SELECT COUNT(*) FROM all_sessions 
+WHERE transactionid IS NULL -- check NULL values in transactionid column, 15,125 rows. Will drop the column
+
+ALTER TABLE all_sessions DROP transactionid -- Drop transactionid column
+
+
+
+SELECT COUNT(*) FROM all_sessions 
+WHERE searchkeyword IS NULL -- check NULL values in searchkeyword column, 15,134 rows (all rows), will drop it
+
+ALTER TABLE all_sessions DROP searchkeyword -- Drop searchkeyword column
+
+
+SELECT DISTINCT currencycode from all_sessions -- Only one currency(USD), there no benefit from this column we can drop it
+
+ALTER TABLE all_sessions DROP currencycode -- Drop currencycode column
+
+
+SELECT COUNT(*) FROM all_sessions 
+WHERE itemquantity IS NULL -- 15,134 all rows are empty, will drop it
+
+SELECT COUNT(*) FROM all_sessions 
+WHERE itemrevenue IS NULL -- 15,134 all rows are empty, will drop it
+
+ALTER TABLE all_sessions DROP itemrevenue, DROP itemquantity -- Drop itemrevenue & itemquantity
+
+
+SELECT productvariant, COUNT(*) FROM all_sessions
+GROUP BY productvariant -- 15,094 has missing data, will drop it
+
+ALTER TABLE all_sessions DROP productvariant -- Drop productvariant column
+
+
+SELECT pagepathlevel1, COUNT(*) FROM all_sessions 
+GROUP BY pagepathlevel1 -- This column has no beneift, will drop it
+
+ALTER TABLE all_sessions DROP pagepathlevel1 -- Drop pagepathlevel1 column
