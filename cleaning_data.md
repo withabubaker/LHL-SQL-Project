@@ -357,6 +357,33 @@ ALTER COLUMN time TYPE TIME USING time::TIME;
 
 
 
+SELECT v2productcategory FROM all_sessions
+WHERE v2productcategory IS NULL OR v2productcategory LIKE '%not%' -- 757 not set records, No Null value
+
+ALTER TABLE all_sessions
+ADD COLUMN product_category VARCHAR -- Will split the category from v2productcategory and put it here
+
+UPDATE all_sessions
+SET product_category = (SELECT SPLIT_PART(v2productcategory, '/', -2)) -- Split v2productcategory, grap the last second last item.
+
+UPDATE all_sessions
+SET product_category = 'NA'
+WHERE product_category = '' -- unified the empty value to NA
+
+UPDATE all_sessions
+SET v2productcategory = 'NA'
+WHERE v2productcategory LIKE '%not set%' --unified the empty value to NA 
+
+UPDATE all_sessions
+SET product_category = 
+(SELECT v2productcategory 
+ 	WHERE product_category = 'NA' 
+ 	AND v2productcategory <> 'NA')
+WHERE product_category = 'NA' -- update the value that has one string part
+
+SELECT v2productcategory, product_category FROM all_sessions WHERE product_category = v2productcategory -- confirm the results
+
+
 
 
 -- ##### Analytics Table ##### --
