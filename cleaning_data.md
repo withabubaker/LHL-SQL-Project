@@ -368,7 +368,7 @@ SET product_category = (SELECT SPLIT_PART(v2productcategory, '/', -2)) -- Split 
 
 UPDATE all_sessions
 SET product_category = 'NA'
-WHERE product_category = '' -- unified the empty value to NA
+WHERE product_category = '' OR product_category IS NULL -- unified the empty value to NA
 
 UPDATE all_sessions
 SET v2productcategory = 'NA'
