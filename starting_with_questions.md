@@ -78,9 +78,19 @@ YES, there a pattern for some category like:
 
 SQL Queries:
 
-
+SELECT s.v2productname, COUNT(*), s.country, s.city
+	FROM analytics AS a
+	JOIN all_sessions AS s
+	ON a.fullvisitorid = s.fullvisitorid
+	WHERE a.units_sold <> 0
+	GROUP BY s.v2productname,s.country, s.city
+	ORDER BY COUNT(*) DESC -- Q4
 
 Answer:
+
+- Android Twill Cap is the most popular product in USA
+- Google Device Stand is the most popular product in Hong Kong
+- Youtube Leatherette Notebook Combo is the most popular product in Canada
 
 
 
