@@ -54,10 +54,21 @@ Answer:
 
 SQL Queries:
 
+SELECT s.product_category AS Category, COUNT(*), s.country, s.city
+	FROM analytics AS a
+	JOIN all_sessions AS s
+	ON a.fullvisitorid = s.fullvisitorid
+	WHERE a.units_sold <> 0
+	GROUP BY s.country, s.city, Category
+	ORDER BY Category, COUNT(*) DESC
 
 
 Answer:
+YES, there a pattern for some category like:
 
+1- There is a high demand on apperal in USA
+2- Bags are more popular in Charlotte, USA
+3- The highest number Electronic Accessories purchases from Hong Kong 
 
 
 
