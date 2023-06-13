@@ -337,6 +337,27 @@ ALTER TABLE all_sessions DROP pagepathlevel1 -- Drop pagepathlevel1 column
 
 
 
+ALTER TABLE all_sessions
+ALTER COLUMN time
+TYPE VARCHAR
+USING LPAD(time::VARCHAR, 6, '0') -- convert time column to TIME data type
+
+UPDATE all_sessions
+SET time = SUBSTR(time, 1, 2) ||':' || SUBSTR(time, 3, 2) || ':' || SUBSTR(time, 5, 2);
+
+UPDATE all_sessions
+SET time = TIME '00:00:00' + 
+           INTERVAL '1 hour' * CAST(SUBSTR(time, 1, 2) AS INTEGER) +
+           INTERVAL '1 minute' * CAST(SUBSTR(time, 4, 2) AS INTEGER) +
+           INTERVAL '1 second' * CAST(SUBSTR(time, 7, 2) AS INTEGER);
+
+
+ALTER TABLE all_sessions
+ALTER COLUMN time TYPE TIME USING time::TIME;
+
+
+
+
 
 -- ##### Analytics Table ##### --
 
@@ -387,6 +408,15 @@ WHERE units_sold is NOT NULL -- 95,147 rows
 UPDATE analytics
 SET units_sold = 0
 WHERE units_sold IS NULL
+
+SELECT MIN(units_sold) FROM analytics -- some values in negative, that's wrong
+
+SELECT * from analytics 
+WHERE units_sold < 0 -- one record only in negative (-89), we will update it to positive
+
+UPDATE analytics
+SET units_sold = 89
+WHERE units_sold = -89
 
 
 
