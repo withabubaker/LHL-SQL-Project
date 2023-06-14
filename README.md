@@ -23,4 +23,4 @@ and trying to find a pattern between location, time spent on site, time of the y
 - No connection/relatioships between the tables. 
 
 ## Future Goals
-I would look at the impact of product stocking and total revenues, do we need to improve the restocking time?
+I would look at the impact of product stocking and total revenues, do we need to improve the restocking lead time?
