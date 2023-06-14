@@ -73,6 +73,9 @@ I think becuase there will be a big discount on summer and fall clothes in winte
 2- In summer (June and July) we can see heather cap and bottel infuser are more popular, which makes sense.
 
 
+
+
+
 Question 4: 
 
 SQL Queries:
