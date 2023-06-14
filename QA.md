@@ -11,11 +11,11 @@ What are your risk areas? Identify and describe them.
 QA Process:
 Describe your QA process and include the SQL queries used to execute it.
 
--- Extracting Process
+--## Extracting Process
 1- Extract the data from 5 CVS files using the proper data type, 
    and make sure the data has been extracted completed by comparing the number of rows in the CSV files and database (Refer Code 1).
 
--- Transformation Process  
+--## Transformation Process  
 2- Analyze the NULL values, if column is numeric, then replace it with 0, 
    if the column is string then replace it with NA. This will make easy when manipulating the data (Ex. Refer Code 2).
 
