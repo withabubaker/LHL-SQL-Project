@@ -479,9 +479,37 @@ SET revenue = revenue / 1000000
 WHERE revenue <> 0 
 
 
+UPDATE analytics
+SET timeonsite = 0
+WHERE timeonsite IS NULL -- repalce NULL values with 0
+
+-- convert timeonsite column to time data type
+ALTER TABLE analytics
+ALTER COLUMN timeonsite
+TYPE VARCHAR
+USING LPAD(timeonsite::VARCHAR, 6, '0')
+
+UPDATE analytics
+SET timeonsite = CONCAT(
+    SUBSTRING(timeonsite, 1, 2),
+    ':',
+    SUBSTRING(timeonsite, 3, 2),
+    ':',
+    SUBSTRING(timeonsite, 5, 2)
+);
+
+UPDATE analytics
+SET timeonsite = TIME '00:00:00' + 
+           INTERVAL '1 hour' * CAST(SUBSTR(timeonsite, 1, 2) AS INTEGER) +
+           INTERVAL '1 minute' * CAST(SUBSTR(timeonsite, 4, 2) AS INTEGER) +
+           INTERVAL '1 second' * CAST(SUBSTR(timeonsite, 7, 2) AS INTEGER);
+
+ALTER TABLE analytics
+ALTER COLUMN timeonsite TYPE TIME USING timeonsite::TIME;
+
+
 
 SELECT DISTINCT channelgrouping from analytics -- 8 groups
-
 
 
 -- ##### Products Table ##### --
