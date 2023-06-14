@@ -14,7 +14,8 @@ and trying to find a pattern between location, time spent on site, time of the y
 ## Results
 - USA has the biggest market by far, 92% of the revenues generated from USA.
 - No clear pattern between time spent on site by the visitor and revenues.
-- Overall, the revenues generated from North American and Europe  
+- 28% of the revenues generated in Dec and Jan (holidays seasons)
+- Overall, the revenues generated from North American and Europe.  
 
 ## Challenges 
 - No clear description of the data provided, not clear how total revenues are calculated.
