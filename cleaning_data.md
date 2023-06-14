@@ -100,6 +100,9 @@ CREATE TABLE sales_report(
 );
 
 
+
+
+
 -- ##### All_sessions Table ##### --
 
 SELECT * FROM all_sessions limit 10 -- Overview of the data
@@ -351,7 +354,6 @@ SET time = TIME '00:00:00' +
            INTERVAL '1 minute' * CAST(SUBSTR(time, 4, 2) AS INTEGER) +
            INTERVAL '1 second' * CAST(SUBSTR(time, 7, 2) AS INTEGER);
 
-
 ALTER TABLE all_sessions
 ALTER COLUMN time TYPE TIME USING time::TIME;
 
@@ -379,9 +381,9 @@ SET product_category =
 (SELECT v2productcategory 
  	WHERE product_category = 'NA' 
  	AND v2productcategory <> 'NA')
-WHERE product_category = 'NA' -- update the value that has one string part
+WHERE product_category = 'NA' -- update the value that has single string
 
-SELECT v2productcategory, product_category FROM all_sessions WHERE product_category = v2productcategory -- confirm the results
+
 
 
 
@@ -516,7 +518,7 @@ SELECT DISTINCT channelgrouping from analytics -- 8 groups
 
 
 SELECT * FROM products limit 10 -- Overview of the data
-SELECT COUNT(*) FROM products -- 1,092 products
+SELECT COUNT(*) FROM products -- 1,092 products 
 
 
 
@@ -552,7 +554,7 @@ SELECT COUNT(*) FROM products -- No NULL values in orderedquantity column
 WHERE orderedquantity IS NULL
 
 SELECT * FROM products 
-WHERE orderedquantity = 0 -- 190 products that have no order placed
+WHERE orderedquantity = 0 -- 190 products that have no order
 
 
 
@@ -599,7 +601,7 @@ FROM products  -- make sure no negative values in orderedquantity, stocklevel, r
 
 SELECT MIN(sentimentscore) AS minsentimentscore, MAX(sentimentscore) AS maxsentimentscore,
 	   MIN(sentimentmagnitude) AS minsentimentmagnitude, MAX(sentimentmagnitude) AS maxsentimentmagnitude
-FROM products -- understand the range for sentimentscore and sentimentmagnitude   
+FROM products -- understand the range for sentimentscore and sentimentmagnitude 
 
 
 
@@ -655,6 +657,7 @@ WHERE total_ordered IS NULL -- No Null values
 
 SELECT COUNT(*) FROM sales_report 
 WHERE total_ordered = 0 -- 150 products with no sales
+
 
 
 
