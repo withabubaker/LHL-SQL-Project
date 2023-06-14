@@ -95,10 +95,9 @@ WHERE RANK = 1
 
 Answer:
 
-- Android Twill Cap is the most popular product in USA
-- Google Device Stand is the most popular product in Hong Kong
-- Youtube Leatherette Notebook Combo is the most popular product in Canada
-
+- Top selling product in USA is Dog Frisbee and Google Collapsible Bowl 
+- Top selling product in Mountain View, USA is Waze Baby on Board Window Decal 
+- Top selling product in Hong Kong is Google device stand
 
 
 
@@ -107,9 +106,19 @@ Answer:
 
 SQL Queries:
 
+SELECT * FROM
+	  (SELECT country, city, 
+	   CAST((SUM(totaltransactionrevenue) / (SELECT SUM(totaltransactionrevenue) from all_sessions)) AS decimal(10,2)) * 100 AS RevenuePercentage
+	   FROM all_sessions
+       GROUP BY country, city
+       ORDER BY RevenuePercentage DESC) AS temp_table 	   
+WHERE RevenuePercentage >= 1 ---- Q5
 
 
 Answer:
+
+USA generates 92% of the total revenues, it's dominate the market.
+In USA, the visitors from San Francisco make 11% of the total revenue, which make it the largest city.
 
 
 
