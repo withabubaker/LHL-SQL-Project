@@ -31,24 +31,46 @@ Question 2: Which month of the year makes more revenues ?
 
 SQL Queries:
 
-SELECT date AS revenuDate, CAST(SUM(totaltransactionrevenue) AS decimal(10,2)) AS totalRevenues
+SELECT EXTRACT (MONTH FROM date) AS revenuDate, CAST(SUM(totaltransactionrevenue) AS decimal(10,2)) AS totalRevenues
 FROM all_sessions
-GROUP BY date
-ORDER BY totalRevenues DESC;
+GROUP BY EXTRACT (MONTH FROM date)
+ORDER BY totalRevenues DESC; --Q2
 
 Answer:
 
 1- The revenues in March at the highest level US$2,986
 2- Then Decemebr with US$2,556, probably becuase of boxing day, black friday and holiday season.
 3- August, September and October have the lowest revenues. 
-   I think most of customers try to save their money to spend it in holiday season, where they can get better offer 
+   I think most of customers try to save their money to spend it in holiday season, where they can get better offer
 
-Question 3: 
+   
+
+Question 3: What is the top-selling product in each month?
 
 SQL Queries:
 
-Answer:
+WITH totalproductOrder AS (
+SELECT *,
+RANK() OVER (PARTITION BY soldDate ORDER BY Total_sold DESC)
+FROM
+(SELECT al.v2productname AS productname, SUM(sv.units_sold) AS Total_sold, EXTRACT (MONTH FROM al.date) AS soldDate
+	FROM all_sessions AS al
+	JOIN sales_by_visitor AS sv
+	ON sv.fullvisitorid = al.fullvisitorid
+	WHERE sv.units_sold <> 0
+	GROUP BY al.v2productname, EXTRACT (MONTH FROM al.date)
+	ORDER BY SUM(sv.units_sold) DESC) AS new_table
+)	
+SELECT *
+FROM totalproductorder
+WHERE RANK = 1
 
+Answer: 
+
+1- Google Men's short sleeve, #1 selling in January & Google Zip Hoodie is #1 selling in February.
+I think becuase there will be a big discount on summer and fall clothes in winter.
+
+2- In summer (June and July) we can see heather cap and bottel infuser are more popular, which makes sense.
 
 
 Question 4: 
